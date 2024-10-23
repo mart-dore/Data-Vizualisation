@@ -1,0 +1,120 @@
+---
+title: "Parte 1 Examen"
+author: "DORE Martin"
+date: "2024-01-19"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+
+# Librerias 
+
+```{r}
+library(dplyr)
+library(RColorBrewer)
+library(ggplot2)
+library(paletteer)
+```
+
+# Importacion de datos
+
+```{r}
+head(USArrests)
+```
+
+# Ejercicio 1
+
+```{r}
+ggplot(data = USArrests, aes(x = Murder, y = Assault))+
+  geom_point(size=2)+
+  xlab("Asesinatos")+
+  ylab("Asaltos")+
+  scale_y_continuous(breaks = seq(50, 350, by = 50))+
+  ggtitle("Analisis de Tasas de Asesinatos y Asaltos por Estado en 1973 :
+          Crimenes Violentos en los Estados Unidos")+
+  theme_classic()
+```
+
+# Ejercicio 2
+
+```{r}
+labels_states = rownames(USArrests)
+
+ggplot(data = USArrests, aes(x = Murder, y = Assault, label = labels_states, color = labels_states))+
+  geom_rect(mapping = aes(xmin = 11, xmax = 18, ymin = 150, ymax = 350, fill = TRUE),
+            alpha = 0.0075, colour = "white") +
+  geom_point(size = 2, shape = 17)+
+  geom_text(nudge_y = 15)+
+  geom_rug()+
+  xlab("Asesinatos")+
+  ylab("Asaltos")+
+  scale_y_continuous(breaks = seq(50, 350, by = 50))+
+  scale_x_continuous(breaks = seq(0,18, by = 2))+
+  ggtitle("Analisis de Tasas de Asesinatos y Asaltos por Estado en 1973 :\n Crimenes Violentos en los Estados Unidos")+
+  theme(legend.position = "None",
+        panel.background = element_rect(
+          fill = "white",
+          color = "white"),
+        plot.title = element_text(
+          color = "darkgreen",
+          hjust = 0.5,
+          face = "bold.italic",
+          size = 15
+        )
+  )+
+  scale_fill_manual(values = "orange")
+```
+
+# Ejercicio 3
+
+## Modificamos los datos para tener los nombres de los estados
+
+```{r}
+data_bar = USArrests %>% 
+  cbind(labels_states)
+
+head(data_bar)
+```
+
+## Grafico de baras
+
+```{r}
+ggplot(data = data_bar, aes(x = labels_states, y = Rape))+
+  geom_bar(stat = "identity")+
+  ylab("Violaciones")+
+  xlab("")+
+  ggtitle("Analisis de Tasas de Violaciones por Estado en 1973:\nCrimenes Violentos en los Estados Unidos")+
+  theme(axis.text.x = element_text(
+    angle = 90
+  ))
+```
+
+# Ejercicio 4
+
+```{r}
+ggplot(data = data_bar, aes(x = reorder(labels_states, UrbanPop), y = Rape, fill = UrbanPop))+
+  geom_bar(stat = "identity", alpha = 0.8, color = "black", linewidth=0.8)+
+  geom_text(aes(label = UrbanPop/100), vjust = -1, color = "black", size=1.5)+
+  ylab("Violaciones")+
+  xlab("")+
+  ggtitle("Analisis de Tasas de Violaciones por Estado en 1973:\nCrimenes Violentos en los Estados Unidos")+
+  theme_light()+
+  theme(axis.text.x = element_text(
+    angle = 90,
+    face = "italic"),
+    plot.title = element_text(
+      color = "red3",
+      face = "italic",
+      size = 15,
+      hjust = 1
+    )
+  )+
+  labs(fill = "Porcentaje\nde la poblacion\nque vive\nen area urbanas")+
+  ylim(c(0,50))+
+  scale_fill_paletteer_c(`"viridis::viridis"`)
+```
+
+

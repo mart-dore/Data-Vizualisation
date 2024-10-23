@@ -1,0 +1,105 @@
+---
+title: "functiones"
+author: "DORE Martin"
+date: "2023-12-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+
+```{r}
+library(ggplot2)
+```
+
+Pour dessiner la function de la loi normale
+```{r}
+ggplot(data.frame(x=c(-3,3)),aes(x=x))+
+  stat_function(fun=dnorm)
+```
+```{r}
+# on peut changer les paramètres de la loi normale
+ggplot(data.frame(x=c(-3,3)),aes(x=x))+
+  stat_function(fun=dnorm, args = list(mean=1, sd=0.25))
+```
+
+# Ejercicio 1. 
+On veut représenter la coubre de $$\frac{1}{(x^2-2x+1)}$$
+
+```{r}
+sencilla = function(x){
+  (1/(x^2-2*x+1))
+}
+
+ggplot(data.frame(x=c(-10,10)),aes(x=x))+
+  stat_function(fun=sencilla, colour="blue",lwd=1,linetype=1)+
+  labs(title = "Grafica de una \nfuncion polinomica")+
+  xlab("Eje X") +
+  ylab("Eje Y") +
+  # theme_classic()+
+  annotate(geom = "text",
+           color = "purple",
+           size = 5,
+           x = 7,
+           y=15,
+           label = expression(f(x) == frac(1, x^2-2*x+1)))+
+  geom_vline(xintercept = 1,color="red",lwd=0.5,linetype=6)+
+  geom_hline(yintercept = 0, color = "red", lwd=0.5, linetype=6)+
+  theme(plot.title = element_text(
+    color = "purple",
+    face = "bold"
+  ),
+  axis.title.x = element_text(
+    color = "purple",
+    face = "bold"
+  ),
+  axis.text.x = element_text(
+    color = "darkblue",
+    face = "bold",
+    angle = 45
+  ),
+  axis.text.y = element_text(
+    color = "grey"
+  ),
+  panel.border = element_blank(),
+  panel.background = element_blank())
+
+```
+
+# Ejercicio a entregar
+
+```{r}
+ggplot(data.frame(x = c(-2.5, 3.5)), aes(x = x)) +
+  geom_area(data = data.frame(x = seq(0.5, 1,by=0.1)),
+            aes(x = x, y = dnorm(x, mean = 1, sd = 1)),
+            fill = "blue") +
+  stat_function(fun = dnorm, args = list(mean = 0, sd = 1), color = "pink", lty="dashed") +
+  geom_area(data = data.frame(x = seq(-0.5, 0, by=0.1)),
+            aes(x = x, y = dnorm(x, mean = 0, sd = 1)),
+            fill = "pink") +
+  stat_function(fun = dnorm, args = list(mean = 1, sd = 1), color = "blue") +
+  labs(title = "Distribucion Normal") +
+  xlab("Valores de x") +
+  ylab("Probabilidad") +
+  theme(panel.border = element_blank(),
+        panel.background = element_blank(),
+        axis.title = element_text(face = "bold"),
+        axis.text.y = element_text(color = "blue"),
+        axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks = c(0, 1)) +
+  geom_hline(yintercept = 0, color = "red", lwd = 1, linetype = 1)+
+  annotate("text", x=2.5, y = 0.3, label = "N(0,1)", color = "pink")+
+  annotate("text", x=2.5, y=0.275, label = "N(1,1)", color ="blue")+
+  geom_segment(x=2.75, xend=3, y=0.3, yend=0.3, color="pink", lty="dashed")+
+  geom_segment(x=2.75, xend=3, y=0.275, yend=0.275, color="blue")+
+  annotate("text",x=0.5, y=0.425, label = "P(-0.5<X<0) = P(0<X<0.5)", size=3)+
+  geom_curve(x=-0.3, xend =-0.6, y = 0.425, yend=0.3, colour = "pink", arrow = arrow(), curvature = 0.5)+
+  geom_curve(x=1.25, xend =1.1, y = 0.425, yend=0.3, colour = "blue", arrow = arrow(), curvature = -0.5, lty="dashed", lwy=2)
+
+
+```
+
+
+

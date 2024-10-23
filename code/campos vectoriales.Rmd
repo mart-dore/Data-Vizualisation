@@ -1,0 +1,118 @@
+---
+title: "Campos Vectoriales"
+author: "DORE Martin"
+date: "2023-12-19"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+```{r}
+library(tidyr)
+library(gcookbook)
+library(dplyr)
+library(ggplot2)
+```
+
+# Importacion de datos
+```{r}
+psych::describe(isabel)
+```
+
+Dans un premier temps on se focalise sur les données plus faible en terme d'altitude.
+
+```{r}
+isabelmin = isabel %>% filter(z == min(z))
+head(isabelmin,10)
+```
+
+
+```{r}
+ggplot(isabelmin, aes(x=x, y=y))+
+  geom_segment( aes(xend=x+vx, yend=y+vy), size = .025)+
+  theme_classic()
+```
+
+
+
+```{r}
+ggplot(isabelmin, aes(x=x, y=y, color = speed))+
+  geom_segment( aes(xend=x+vx/30, yend=y+vy/30), size = .025)+
+  scale_color_gradient(low = "green", high = "red")+
+  theme_classic()
+```
+
+
+
+```{r}
+ggplot(isabel, aes(x=x, y=y))+
+  geom_segment( aes(xend=x+vx, yend=y+vy), size = .025)+
+  theme_classic()
+```
+
+
+```{r}
+isabelmax = isabel %>% filter(z == max(z))
+
+ggplot(isabelmax, aes(x=x, y=y, color = speed))+
+  geom_segment( aes(xend=x+vx/30, yend=y+vy/30), size = .025, linewidth = .5)+
+  scale_color_gradient(low = "green3", high = "red")+
+  theme_minimal()
+```
+
+
+
+```{r}
+uno_cada_M = function(x, M) {
+  x = sort(x)
+  x[seq(1, length(x), by = M)]
+}
+```
+
+
+```{r}
+sub_x = uno_cada_M(unique(isabelmin$x), M = 4)
+sub_y = uno_cada_M(unique(isabelmin$y), M = 4)
+```
+
+
+
+```{r}
+isabelmin_sub = filter(isabelmin, x %in% sub_x & y %in% sub_y)
+```
+
+
+
+```{r}
+library(grid) # para dibujar flechas
+
+ggplot(isabelmin_sub, aes(x=x, y=y, color = speed))+
+  geom_segment(aes(xend=x+vx/45, yend=y+vy/45), size = .025,
+               arrow = arrow(length = unit(0.1, "cm"), type = "closed"))+
+  scale_color_gradient(low = "black", high = "red")
+```
+
+
+```{r}
+library(maps)
+map = map("usa")
+```
+
+
+```{r}
+ggplot(map)+
+  geom_polygon(aes(x=long, y=lat, group = group), fill = NA, color = "black")+
+  geom_segment(data=isabelmin_sub,
+               aes(x=x, y=y, xend=x+vx/50, yend=y+vy/50, color = speed),
+               size = .025,
+               arrow = arrow(length = unit(0.1, "cm"), type = "closed"))+
+  scale_color_gradient(low = "orange", high = "red")+
+  scale_fill_manual(values = rep("black", 10))+
+  theme_minimal()+
+  theme(legend.position = "none") +
+  coord_cartesian(xlim = c(-90, -65), ylim = c(20,50))
+```

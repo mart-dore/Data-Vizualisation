@@ -1,0 +1,42 @@
+---
+title: "Diagrama de Arborles Entregable"
+author: "DORE Martin"
+date: "2024-01-04"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+
+# Librerias
+```{r}
+library(rattle)
+library(rpart)
+library(rpart.plot)
+library(RColorBrewer)
+```
+
+
+# Importacion de datos
+
+```{r}
+head(iris, 5)
+```
+El objetivo del árbol de decisión es predecir el tipo de planta (Species) en función de las medidas de pétalos y sépalos.
+
+# Diagrama de arbol
+```{r}
+arbol = rpart(Species~., data = iris, method = "class")
+fancyRpartPlot(arbol,
+               main = "Arbol de decision por datos de iris",
+               palettes = c("Purples", "Greens", "Oranges"),
+               caption = NULL )
+```
+
+# Interpretacion
+
+Se observa que la longitud de los pétalos permite, en una primera instancia, separar todos los setosa de los versicolor y virginica. Luego, en el caso en que se desee diferenciar una iris versicolor de una virginica, se compara la anchura de los pétalos. Se observa que el árbol es muy preciso, ya que identifica el $100\%$ de las setosas. El modelo tiene un poco más de dificultad para diferenciar virginica de versicolor.  
+Por ejemplo, una iris con pétalos de longitud $3 cm$ y ancho $2 cm$ sería identificada según el modelo como una **versicolor**.
+

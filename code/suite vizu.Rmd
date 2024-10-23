@@ -1,0 +1,199 @@
+---
+title: "Suite vizualisacion"
+author: "DORE Martin"
+date: "2023-11-21"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+# libraries
+```{r}
+library(maps)
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+library(RColorBrewer)
+library(paletteer)
+library(corrplot)
+library(plotrix)
+```
+
+
+# MAPAS
+
+## Ejercicio 1
+```{r}
+EEUU = map_data("state")
+head(EEUU)
+```
+Pour afficher la carte, il suffit de faire un ggplot avec en x la longitude et en y la latitude
+
+
+```{r}
+ggplot(EEUU,aes(x = long, y = lat, group = group))+
+  geom_polygon(fill = "white", colour = "black")
+```
+
+
+```{r}
+mapa_mundo = map_data("world")
+
+ggplot(mapa_mundo,aes( x= long, y = lat, group = group)) +
+  geom_polygon( fill = "black", color = "white")
+```
+
+Pour connaitre toutes les régions disponibles et toutes les villes
+```{r}
+print(unique(mapa_mundo$region), max = 10)
+print(unique(world.cities$name), max = 10)
+```
+
+
+
+```{r}
+ggplot(mapa_mundo,aes( x= long, y = lat, group = group),) +
+  geom_polygon( fill = "green3", color = "white")+
+  theme(
+    axis.line = element_line(size = 3, colour = "pink"),
+    axis.text = element_text(colour = "blue",size=12),
+    axis.title = element_blank(),
+    axis.ticks = element_line(size = 5),
+    panel.background = element_rect(fill="blue")) +
+  ggtitle( "Mapa Mundi")
+```
+
+
+
+```{r}
+ggplot(mapa_mundo,aes( x= long, y = lat, group = group),) +
+  geom_polygon( fill = "lightblue", color = "white")+
+  theme(
+    axis.line = element_line(size = 3, colour = "pink"),
+    axis.text = element_text(colour = "blue",size=12),
+    axis.title = element_blank(),
+    axis.ticks = element_line(size = 5),
+    panel.background = element_rect(fill=NA)) +
+  ggtitle( "Peninsula")+
+  coord_fixed (xlim= c(-12,5),
+               ylim= c(35,45),
+               ratio = 1.3)
+```
+
+
+## Ejercicio 2 (Entregables) 
+
+```{r}
+# Lista de países
+paises <- c("Portugal", "Spain", "France", "Switzerland", "Germany", "Austria", "UK", "Netherlands",
+            "Denmark", "Poland", "Italy", "Croatia", "Slovenia", "Hungary", "Slovakia", "Czech republic",
+            "Sweden", "Finland", "Norway", "Estonia", "Lithuania", "Ukraine", "Belarus", "Romania",
+            "Belgium", "Bulgaria", "Greece", "Moldova", "Latvia", "Luxembourg", "Serbia", "Bosnia and Herzegovina",
+            "North Macedonia", "Montenegro", "Albania", "Ireland", "Kosovo")
+
+
+
+# Quedar solamente paises de europa
+mapa_europa = mapa_mundo %>% 
+  filter(region %in% paises)
+
+# etiquetas por los paises
+etiquetas_paises <- mapa_europa %>%
+  group_by(region) %>%
+  summarise(mean_long = mean(long), mean_lat = mean(lat))
+
+# Datos de las capitales
+capitales <- data.frame(
+  ciudad = c("Lisboa", "Madrid", "Paris", "Roma"),
+  longitud = c(-9.1333300, -3.70256, 2.3488, 11.71819),
+  latitud = c(38.71667, 40.4165, 48.85341, 45.58383)
+)
+
+ggplot(mapa_europa) +
+  geom_polygon(aes(x = long, y = lat, group = group, fill = region), color = "white") +
+  geom_text(data = etiquetas_paises,
+            aes(x=mean_long, y=mean_lat, label = region), 
+            size = 3, hjust= 0.5, color = "black") +
+  geom_text(data = capitales,
+            aes(x=longitud, y=latitud, label = ciudad),
+            color = "red", nudge_y = -1.5)+
+  geom_point(data = capitales,
+             aes(x = longitud, y = latitud),
+             color = "red", size = 2) +
+  scale_fill_manual(values = paletteer_c("ggthemes::Purple", length(paises))) +
+  theme_classic() +
+  theme(
+    legend.position = "None",
+    axis.title.x = element_text(size = 10, color = "red", family = "bold"),
+    axis.title.y = element_text(size = 8, color = "black"),
+    axis.text.x = element_text(size = 8, color = "blue", angle = 45),
+    axis.text.y = element_text(size = 8, color = "pink")
+  ) +
+  labs(title = "Mapa Europa", subtitle = "Algunas Capitales") +
+  xlab("Longitud") +
+  ylab("Latitud")
+
+```
+
+# GRAFICO DE SECTORES
+
+```{r}
+alumnos = c(1, 5, 1, 1, 1, 3, 4, 2)
+grados = c("Matematicas", "Fisica", "Quimico", "ADE", "Ingeneria", "Estadistica", "Informatica", "Economia")
+pie(alumnos,radius=0.8, labels = grados, cex=1)
+```
+
+
+```{r}
+etiquetas = paste0(round(100 * alumnos/sum(alumnos), 2), "%")
+pie(alumnos, labels = etiquetas,radius=0.8)
+```
+
+## Ejercicio 1
+
+```{r}
+# paste grados y %
+grados_porcentage = paste(grados, etiquetas, sep = "_")
+
+pie(alumnos, labels = grados_porcentage, radius = 0.8, col = rainbow(length(grados)), cex = 0.5)
+legend(x=1.5, y=1, legend = grados, title = "Grados", cex = 0.6,
+       fill = rainbow(length(grados)), border = "red", bty="n",
+       title.col="blue", title.font = 2)
+title(main = "Diagrama de sectores", col.main = "darkgreen", font.main = 2, cex.main = 1.5)
+title(xlab = "Estudiantes Master", col.lab = "blue", font.lab = 2, cex.lab = 1.2)
+
+```
+## Ejercicio 2
+
+```{r}
+palette = brewer.pal(n=length(grados), "Reds")
+palette = rev(palette)
+pie3D(alumnos,
+      labels = grados_porcentage,
+      radius = 0.8,
+      explode = 0.1,
+      height = 0.1,
+      col = palette,
+      labelcex=0.7,
+      labelcol = "red1",
+      border = "white")
+legend(x=-0.85, y=1,
+       legend = grados,
+       cex = 0.6,
+       fill = palette,
+       title.col = "blue",
+       title.font = 2,
+       ncol = 3,
+       box.col = "red",
+       box.lty = "longdash",
+       inset = c(-0.2,0))  
+title("Diagrama de sectores 3D", col.main = "darkgreen", font.main = 2, cex.main = 1.2)
+title(xlab = "Estudiantes Master", col.lab = "blue", font.lab = 2, cex.lab = 1.2)
+```
+
+
+

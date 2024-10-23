@@ -1,0 +1,116 @@
+---
+title: "Plot 3D"
+author: "DORE Martin"
+date: "2023-12-12"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Librerias
+```{r}
+library(scatterplot3d)
+library(rgl)
+```
+
+```{r}
+z = seq(-10, 10, 0.01)
+x = cos(z)
+y = sin(z)
+scatterplot3d(x, y, z, highlight.3d=TRUE, col.axis="blue",
+              col.grid="lightblue", main="scatterplot3d ‐ 1", pch=20)
+```
+
+```{r}
+data(iris)
+x= iris$Sepal.Length
+y= iris$Petal.Length
+z = iris$Sepal.Width
+a = scatterplot3d(x, y, z, highlight.3d = TRUE, col.axis="grey", col.grid="lightblue",
+                  main="scatterplot3d ", pch=18)
+a$points3d(seq(5,8,1), seq(2,5,1), seq(3.5,3.8,0.1), col="green", pch=16)
+
+```
+
+# EJERCICIO 1
+
+```{r}
+x= iris$Sepal.Length
+y= iris$Petal.Length
+z = iris$Sepal.Width
+
+# colores
+colors <- c("setosa" = "red", "versicolor" = "pink", "virginica" = "blue")
+col_vector <- colors[as.character(iris$Species)]
+
+# shape 
+shapes = c(16, 17, 18) 
+shapes <- shapes[as.numeric(iris$Species)]
+
+# Créer le graphique 3D
+scatterplot3d(x, y, z, color = col_vector,
+              pch = shapes,
+              type = "h",
+              main = "Grafico 3D",
+              sub = "Base de datos iris",
+              xlab = "Longitud de Sepalo",
+              ylab = "Longitud de Petalo",
+              zlab = "Anchura de Petalo",
+              col.axis = "pink",
+              col.grid = "lightblue",
+              col.lab = "purple")
+```
+
+# Ejercicio 2
+```{r}
+lmodel = lm(z~ x +y)
+S3D = scatterplot3d(x, y, z, color = col_vector,
+                    pch = shapes,
+                    type = "h",
+                    main = "Grafico 3D",
+                    sub = "Base de datos iris",
+                    xlab = "Longitud de Sepalo",
+                    ylab = "Longitud de Petalo",
+                    zlab = "Anchura de Petalo",
+                    col.axis = "pink",
+                    col.grid = "lightblue",
+                    col.lab = "purple")
+
+legend("topleft",
+       legend = levels(iris$Species),
+       col = c("red", "pink", "blue"),
+       pch = c(16,17,18),
+       bty="n")
+
+S3D$plane3d(lmodel, lty = "dotted", col = "black")
+```
+
+# Grafico de funciones
+```{r}
+x=seq(-3,3,length=100)
+y=seq(-3,3,length=100)
+
+parabola = function(x,y) {x^2+y^2}
+z=outer(x, y, parabola)
+persp(x,y,z)
+```
+
+Pour rendre ça un peu plus joli
+
+```{r}
+ecuacionParab = expression(z == x^2 + y^2)
+persp(x,y,z,theta = 30, phi = 30,expand=0.5, col = "orange",
+      main="Paraboloide", sub=ecuacionParab, col.main="blue")
+```
+
+```{r}
+persp3d(x,y,z,theta = 30, phi = 30,expand=0.5, col = rainbow(100),
+           main="Paraboloide", sub=ecuacionParab, col.main="blue")
+```
+
+
+

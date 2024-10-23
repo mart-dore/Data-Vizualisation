@@ -1,0 +1,53 @@
+---
+title: "Intregable Funciones"
+author: "DORE Martin"
+date: "2023-12-15"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(ggplot2)
+```
+
+
+
+```{r}
+ggplot(data.frame(x = c(-2.5, 3.5)), aes(x = x)) +
+  geom_area(data = data.frame(x = seq(0.5, 1,by=0.1)),
+            aes(x = x, y = dnorm(x, mean = 1, sd = 1)),
+            fill = "blue") +
+  stat_function(fun = dnorm, args = list(mean = 0, sd = 1), color = "pink", lty="dashed") +
+  geom_area(data = data.frame(x = seq(-0.5, 0, by=0.1)),
+            aes(x = x, y = dnorm(x, mean = 0, sd = 1)),
+            fill = "pink") +
+  stat_function(fun = dnorm, args = list(mean = 1, sd = 1), color = "blue") +
+  labs(title = "Distribucion Normal") +
+  xlab("Valores de x") +
+  ylab("Probabilidad") +
+  theme(panel.border = element_blank(),
+        panel.background = element_blank(),
+        axis.title = element_text(face = "bold"),
+        axis.text.y = element_text(color = "blue"),
+        axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks = c(0, 1)) +
+  geom_hline(yintercept = 0,
+             color = "red", lwd = 1, linetype = 1)+
+  annotate("text", x=2.5, y = 0.3,
+           label = "N(0,1)", color = "pink")+
+  annotate("text", x=2.5, y=0.275,
+           label = "N(1,1)", color ="blue")+
+  geom_segment(x=2.75, xend=3, y=0.3, yend=0.3,
+               color="pink", lty="dashed")+
+  geom_segment(x=2.75, xend=3, y=0.275, yend=0.275,
+               color="blue")+
+  annotate("text",x=0.5, y=0.425, label = "P(-0.5<X<0) = P(0<X<0.5)", size=3)+
+  geom_curve(x=-0.3, xend =-0.6, y = 0.425, yend=0.3,
+             colour = "pink",size = 1.2, arrow = arrow(), curvature = 0.5)+
+  geom_curve(x=1.25, xend =1.1, y = 0.425, yend=0.3,
+             colour = "blue",size = 1.2, arrow = arrow(), curvature = -0.5, lty="dashed", lwy=2)
+
+```
+

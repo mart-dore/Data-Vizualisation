@@ -1,0 +1,224 @@
+---
+title: "Entregables - Martin DORE"
+author: "DORE Martin"
+date: "2023-10-19"
+output: 
+  rmdformats::readthedown
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+```{r, include = FALSE}
+# --- Importacion de las librairies ---
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(RColorBrewer)
+library(gcookbook)
+library(ggrepel)
+library(tidyverse)
+library(babynames)
+library(tidyr)
+library(ggrepel)
+```
+
+# **Ejercicio 1** : COVID
+## Importacion de datos 
+```{r}
+data_covid <- read_csv("casos_hosp_uci_def_sexo_edad_provres.csv")
+data_covid$fecha = as.Date(data_covid$fecha)
+head(data_covid)
+```
+
+## Filtracion de datos
+Queremos estudiar la evolución del número de casos de covirus durante el mes de enero de 2021 en las provincias de Andalucia
+
+```{r}
+# provincia de Andalucia por ISO y por nombres
+provincias = c("HU", "SE", "CO", "J", "CA", "MA", "GR", "AL")
+provincias_names = c("Huelva", "Sevilla", "Cordoba", "Jaen", "Cadiz", "Malaga", "Grenada", "Almeria")
+
+data_grafico = data_covid %>% 
+  filter(fecha >= "2021/01/01" & fecha <= "2021/01/31") %>% # guardar datos del mes de enero
+  filter(sexo %in% c("H", "M")) %>%  #guardar uniquamente hombres y mujeres
+  filter(provincia_iso %in% provincias)
+
+data_grafico = data_grafico %>%
+  group_by(fecha, provincia_iso) %>% 
+  summarise(sum_casos = sum(num_casos))
+```
+
+## Grafico
+
+```{r}
+# elecion de colores
+colors = brewer.pal(length(provincias), "Dark2")
+
+# plot blanco
+plot(c(1:31), 
+     c(1:31),
+     col = "white",
+     ylim = c(0,max(data_grafico$sum_casos)),
+     main = "Evolution del numero de casos de COVID19 en las provincias de Andalucia en enero 2021",
+     cex.main = 0.8,
+     xlab="",
+     ylab = "Numero de casos",
+     xaxt= "n")
+
+# lineas por cada provincia
+for(i in (1:length(provincias))){
+  lines(c(1:31),
+        data_grafico$sum_casos[which(data_grafico$provincia_iso == provincias[i])],
+        col = colors[i],
+        lwd = 1.5)
+}
+
+# fechas
+axis(1, at=c(1:31), labels =  unique(data_grafico$fecha), las = 2, cex.axis = 0.8)
+
+
+# Leyenda
+legend("topleft",
+       legend = provincias_names,
+       col = colors,
+       lty=1,
+       lwd = 1.5,
+       cex = 0.8,
+       title = "Provincias")
+```
+
+# **Ejercicio 2**: DIAMONDS 
+## Importacion datos
+```{r}
+head(diamonds)
+```
+
+## Filtracion datos
+```{r}
+diamonds_summary = diamonds %>%
+  group_by(cut, color) %>% 
+  summarise(mean_price = mean(price))
+```
+
+## Graficos
+```{r}
+ggplot(data = diamonds_summary, aes(x = cut, y = mean_price, fill = color))+
+  geom_bar(position = "stack", stat = "identity", alpha = .6)+
+  scale_fill_manual(values = rainbow(7)) +
+  labs(x = "Type of cut",
+       y = "Mean of price")
+```
+
+```{r}
+ggplot(data = diamonds_summary, aes(x = cut, y = mean_price, fill = color))+
+  geom_bar(position = "dodge", stat = "identity", alpha = .5)+
+  scale_fill_manual(values = brewer.pal(7, "Set1")) +
+  labs(x = "Type of cut",
+       y = "Mean of price")
+```
+
+# **Ejercicio 3** : TEMPERATURAS
+
+## Importacion datos
+```{r}
+Temperatures <- read_csv("Temperatures.csv")
+head(Temperatures)
+```
+
+
+```{r}
+ggplot(data = Temperatures, aes(x = Year, y = Variation))+
+  geom_bar(stat = "identity", aes(fill = Positive), position = "dodge") +
+  scale_fill_manual(values = c("blue", "red"))
+```
+Podemos ver que cuanto más tiempo pasa, más positivas son las variaciones de temperatura, lo que demuestra que se está produciendo un calentamiento global.
+
+# **Ejercicio 4** :  Nombres
+## Grafico de linea
+
+```{r}
+data <- babynames %>% 
+  filter(name %in% c("Paul", "Jason")) %>%
+  filter(sex=="M") %>%
+  filter(year%%3 == 0 & year > 1950) %>%
+  select(year, name, n) %>%
+  spread(key = name, value=n, -1)
+
+# Select a few date to label the chart
+tmp_date <- data %>% sample_frac(0.3)
+
+# plot 
+data %>% 
+  ggplot(aes(x=Paul, y=Jason, label=year)) +
+  geom_point(color = "aquamarine3") +
+  geom_text_repel(data=tmp_date) +
+  geom_segment(aes(
+    xend=c(tail(Paul, n=-1), NA), 
+    yend=c(tail(Jason, n=-1), NA)
+  ),
+  arrow=arrow(length=unit(0.3,"cm")), 
+  color = "aquamarine3"
+  ) + 
+  labs(title = "Evolución de los nombres 'Jason' y 'Paul' desde 1950") + 
+  theme(legend.position = "none")
+```
+## Otro grafico
+
+```{r}
+
+ggplot(data) +
+  geom_line(aes(x = year, y = Jason, color = "Jason")) +
+  geom_line(aes(x = year, y = Paul, color = "Paul")) +
+  scale_color_manual(values = c("Jason" = "blue", "Paul" = "red")) +
+  labs(color = "Nombre",
+       title = "Evolucion de los nombres Paul y Jason")+
+  ylab("Numero de nombre")
+```
+
+# **Ejercicio 5** : Esperanza de Vida
+## Importacion de datos
+
+```{r}
+datos_esperanza = read_delim("EsperanzaVidayNatalidadCA.csv",
+                             delim = ";", escape_double = FALSE,
+                             locale = locale(decimal_mark = ",",encoding = "WINDOWS-1252"),
+                             trim_ws = TRUE)
+head(datos_esperanza, 5)
+```
+## Nuebe de puntos
+
+```{r}
+ggplot(datos_esperanza, aes(x=EsperanzaVida, y=Natalidad, color = ComunidadesAutonomas, label = ComunidadesAutonomas))+
+  geom_point()+
+  geom_label_repel(box.padding = 0.25, max.overlaps = 100) +
+  theme(legend.position = "None")
+```
+
+
+
+
+# **Ejercicio 6** : Grafico que me gusta
+
+Vamos a utilizar el grafico de bara sobre *diamonds* :
+
+```{r}
+library(ggplot2)
+
+ggplot(data = diamonds_summary, aes(x = cut, y = mean_price, fill = color)) +
+  geom_bar(position = "stack", stat = "identity", alpha = 0.6, color = "black") +
+  scale_fill_manual(values = brewer.pal(7, "Blues")) +
+  labs(x = "Type of cut",
+       y = "Mean of price") +
+  ggtitle("Mean Price by Cut Type") +
+  theme_classic() +
+  theme(plot.title = element_text(face = "bold", size = 14, hjust = 0.5,
+                                  color = "darkcyan")) +
+  theme(axis.text.x = element_text(color = "darkturquoise"), 
+        axis.text.y = element_text(color = "darkturquoise"),
+        axis.title.x = element_text(color = "darkcyan"),
+        axis.title.y = element_text(color = "darkcyan"))
+
+```
+

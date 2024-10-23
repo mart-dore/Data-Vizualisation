@@ -1,0 +1,108 @@
+---
+title: "Parte 2 Examen"
+author: "DORE Martin"
+date: "2024-01-19"
+output:  pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+
+# Librerias 
+
+```{r}
+library(dplyr)
+library(RColorBrewer)
+library(ggplot2)
+library(paletteer)
+```
+
+
+# Ejercicio 1
+
+```{r}
+map_world = map_data("world")
+```
+
+
+```{r}
+map_spain = map_data("world", regions = c("Spain", "Tenerife","Portugal", "Canary Islands"))
+
+# Datos de las ciudades
+ciudades <- data.frame(
+  ciudad = c("Barcelona", "Madrid", "Tenerife"),
+  longitud = c(2.1589900, -3.702256, -16.25462),
+  latitud = c(41.38879, 40.4165, 28.46824)
+)
+
+
+ggplot(map_spain) +
+  geom_polygon(aes(x= long, y = lat, group = group, fill = region),
+               color = "orange", linetype = "dotted", linewidth = .75) +
+  geom_text(data = ciudades,
+            aes(x=longitud, y=latitud, label = ciudad),
+            color = "black", nudge_y = -.5)+
+  geom_point(data = ciudades, aes(x = longitud, y = latitud), color = "blue", size=1)+
+  geom_curve(x=-3.702256, xend =-16.25462, y = 40.4165, yend=28.46824,
+             colour = "black", arrow = arrow(length = unit(0.3, "cm")), curvature = 0.5)+
+  annotate("text",x=mean(c(-3.702256,-16.25462)) - 5, y=mean(c(40.4165,28.46824)) +2,
+           label = "2091km", size=5, color = "blue", angle = 45)+
+  ggtitle("Distancia\nMadrid-Tenerife")+
+  scale_fill_manual(values = c("brown1", "deepskyblue", "grey"))+
+  theme(
+    legend.position = "None",
+    panel.background = element_rect(color = "white", fill = "white"),
+    axis.text = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title = element_blank(),
+    plot.title = element_text(face = "bold", size = 10)
+  )
+```
+
+# Ejercicio 2
+
+```{r}
+data_exp = data.frame(x = c(-15,15))
+data_log = data.frame(x = c(0.1,15))
+
+# bisectriz
+bisectriz = function(x){x}
+
+
+points = data.frame(
+  x = c(0,1),
+  y = c(1,0),
+  labels = c("(0,1)", "(1,0)")
+)
+
+ggplot()+
+  stat_function(data = data_exp, aes(x=x),fun = exp,
+                colour="blue",lwd=1,linetype=1)+
+  stat_function(data = data_log, aes(x=x),fun = log,
+                colour="red",lwd=1,linetype=1)+
+  stat_function(data = data_exp, aes(x=x),fun = bisectriz,
+                colour="black",lwd=.5,linetype="dashed")+
+  geom_area(data = data.frame(x = seq(1, 15, by=0.1)),
+            aes(x = x, y = log(x)),
+            fill = "red", alpha = .35) +
+  geom_vline(xintercept = 0,color="black",lwd=0.5,linetype=6)+
+  geom_hline(yintercept = 0, color = "black", lwd=0.5, linetype=6)+
+  geom_point(data = points, aes(x=x, y=y, color = as.factor(x)), size = 2)+
+  annotate(x = 0, y = 2, geom = "text", label = "(0,1)", size = 5)+
+  annotate(x = 1, y = -1.5, geom = "text", label = "(1,0)", size = 5)+
+  ylim(c(-15,15))+
+  annotate(x = -5, y = 2, geom = "text", label = expression(y == e^x), color = "blue")+
+  annotate(x = 8, y = 3, geom = "text", label = expression(y == log(x)), color = "red")+
+  annotate(x = -.5, y = 15, geom  = "text", label = "y")+
+  annotate(x = 15, y = -.5, geom = "text", label = "x")+
+  scale_color_manual(values = c("blue", "red"))+
+  theme(panel.background = element_blank(),
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "None")
+```
+
+
